@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, CheckCircle2, Megaphone, ArrowRight } from 'lucide-react';
+import { Plus, CheckCircle2, Megaphone, FileText, Sparkles, Send } from 'lucide-react';
 import MarketingOverview from './MarketingOverview';
 import CampaignsList from './CampaignsList';
 import ContentWorkspace from './ContentWorkspace';
@@ -9,6 +9,7 @@ import MarketingInsight from './MarketingInsight';
 import CreateCampaignModal from './CreateCampaignModal';
 import ContentReviewModal from './ContentReviewModal';
 import { Campaign, ContentDraft, ContentStatus } from './types';
+import { useForge } from '../../../context/ForgeContext';
 
 const initialCampaigns: Campaign[] = [
   {
@@ -100,87 +101,82 @@ const initialDrafts: ContentDraft[] = [
     ],
   },
   {
-    id: 'draft-website',
-    title: 'Landing Page Hero & Feature Copy Refactor',
-    channel: 'Website Copy',
-    campaignId: 'camp-launch',
-    status: 'Draft',
-    scheduledFor: 'Oct 27, 6:00 PM',
-    author: 'Design & Product',
-    excerpt: 'Build the company. Not the chaos. A unified operating workspace engineered for ambitious founders.',
-    fullBody: 'Build the company. Not the chaos.\n\nFORGE brings the three essential operational areas of startup creation — Finance, Hiring, and Legal — into one intelligent workspace with Fraunces typography, liquid-glass precision, and zero administrative clutter.',
-    lastUpdated: '3h ago',
-    keyPoints: [
-      'Reflects revised product preview and command input interactions.',
-      'Ensures typography and spacing match brand standards.',
-    ],
-  },
-  {
-    id: 'draft-email',
-    title: 'Early Access Community Dispatch & Release Notes',
-    channel: 'Newsletter',
+    id: 'draft-twitter',
+    title: 'Visual Breakdown: Autonomous Founder Workflows (Thread)',
+    channel: 'X / Twitter',
     campaignId: 'camp-launch',
     status: 'Draft',
     scheduledFor: 'Oct 28, 10:00 AM',
-    author: 'Growth Team',
-    excerpt: 'A special letter to our first 250 pilot founders. Here is everything shipping in v1.2 and what comes next.',
-    fullBody: 'A special letter to our first 250 pilot founders.\n\nThank you for stress-testing FORGE over the last 6 months. In v1.2, we have rolled out instant Delaware mutual NDA drafting, automated headcount runway projections, and our global ⌘K command palette.',
-    lastUpdated: 'Yesterday',
+    author: 'Sarah Lin',
+    excerpt: '1/7 How we cut 14 hours of weekly operational context-switching into 3 approvals in FORGE.',
+    fullBody: '1/7 How we cut 14 hours of weekly operational context-switching into 3 approvals in FORGE.\n\n2/7 When you hire a senior engineer, your runway calculation changes immediately. Traditional tools force you to update 3 different apps.\n\n3/7 In FORGE, headcount burn is tied directly to bank cash balances and offer generation in real time.',
+    lastUpdated: '3h ago',
     keyPoints: [
-      'Sent exclusively to approved beta users and angel investors.',
-      'Includes direct link to founder feedback forum.',
+      'Punchy founder-to-founder direct tone.',
+      'Embedded screenshots of clean runway gauge.',
     ],
   },
 ];
 
-import { useForge } from '../../../context/ForgeContext';
-
 export default function MarketingView() {
-  const { campaigns, contentDrafts: drafts, addCampaign, updateContentDraftStatus } = useForge();
+  const { addActivity, showToast } = useForge();
+  const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
-  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(drafts[0]?.id || null);
+  const [drafts, setDrafts] = useState<ContentDraft[]>(initialDrafts);
+  const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'workspace' | 'insights'>('campaigns');
   const [createCampaignModalOpen, setCreateCampaignModalOpen] = useState(false);
   const [reviewModalDraft, setReviewModalDraft] = useState<ContentDraft | null>(null);
 
-  const selectedDraft = drafts.find((d) => d.id === selectedDraftId) || drafts[0] || null;
+  const selectedDraft = drafts.find((d) => d.id === selectedDraftId) || drafts[0];
+  const currentSelectedCampaign = campaigns.find((c) => c.id === selectedCampaignId) || campaigns[0];
 
-  const handleCreateCampaign = (
-    campaignData: Omit<Campaign, 'id' | 'lastActivity' | 'contentCount' | 'approvedCount' | 'nextScheduledItem'>
-  ) => {
-    addCampaign({
+  const handleCreateCampaign = (campaignData: Omit<Campaign, 'id' | 'lastActivity' | 'contentCount' | 'approvedCount' | 'nextScheduledItem'>) => {
+    const newCamp: Campaign = {
       ...campaignData,
+      id: `camp-${Date.now()}`,
       lastActivity: 'Just now',
-      contentCount: 1,
+      contentCount: 0,
       approvedCount: 0,
-      nextScheduledItem: 'First draft in review',
-    });
+      nextScheduledItem: 'Schedule initial deliverable',
+    };
+
+    setCampaigns([newCamp, ...campaigns]);
+    setSelectedCampaignId(newCamp.id);
+    addActivity('marketing', 'Campaign created', `Staged strategic campaign: ${newCamp.title}`);
+    showToast(`Created campaign: ${newCamp.title}`, 'success');
   };
 
   const handleUpdateDraftStatus = (draftId: string, newStatus: ContentStatus) => {
-    updateContentDraftStatus(draftId, newStatus);
+    setDrafts((prev) =>
+      prev.map((d) => (d.id === draftId ? { ...d, status: newStatus, lastUpdated: 'Just now' } : d))
+    );
+
+    const draft = drafts.find((d) => d.id === draftId);
+    if (newStatus === 'Published' || newStatus === 'Scheduled') {
+      addActivity('marketing', 'Content asset approved', `Approved "${draft?.title}" for distribution on ${draft?.channel}.`);
+      showToast(`Approved: ${draft?.title}`, 'success');
+    }
   };
 
   const displayedDrafts = selectedCampaignId
     ? drafts.filter((d) => d.campaignId === selectedCampaignId)
     : drafts;
 
-  const currentSelectedCampaign =
-    campaigns.find((c) => c.id === selectedCampaignId) || campaigns[0];
-
   return (
-    <div className="relative mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 space-y-8">
+    <div className="relative mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 space-y-7">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-foreground-faint">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground-faint">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
             <span>04 · Growth</span>
           </div>
           <h1 className="mt-1 font-display text-3xl sm:text-4xl text-foreground font-medium tracking-tight">
-            Marketing
+            Marketing & Narrative
           </h1>
           <p className="mt-1 text-sm sm:text-base text-foreground-soft font-normal">
-            Turn ideas into campaigns that move the company forward.
+            Multi-channel campaign orchestration, announcements, and narrative distribution.
           </p>
         </div>
 
@@ -188,15 +184,15 @@ export default function MarketingView() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setCreateCampaignModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-xs font-medium text-background hover:bg-foreground/90 transition-all duration-150 shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-foreground px-4 py-2 text-xs font-semibold text-background hover:bg-foreground/90 transition-all duration-150 shadow-xs cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
-            <span>Create campaign</span>
+            <span>Create Campaign</span>
           </button>
         </div>
       </div>
 
-      {/* Marketing Overview Summary */}
+      {/* Marketing Overview (Clean Metrics Ribbon) */}
       <MarketingOverview
         activeCampaignsCount={campaigns.filter((c) => c.status === 'Active').length}
         draftsCount={drafts.filter((d) => d.status === 'Draft' || d.status === 'Ready for Review').length}
@@ -204,55 +200,112 @@ export default function MarketingView() {
         publishedCount={24}
       />
 
-      {/* Campaigns List */}
-      <CampaignsList
-        campaigns={campaigns}
-        selectedCampaignId={selectedCampaignId}
-        onSelectCampaign={setSelectedCampaignId}
-      />
+      {/* Segmented Sub-Navigation Bar */}
+      <div className="flex items-center justify-between border-b border-border/80 pb-2">
+        <div className="flex items-center gap-2">
+          {[
+            { id: 'campaigns', label: 'Campaigns & Preview', icon: Megaphone },
+            { id: 'workspace', label: 'Content Workspace & Drafts', icon: FileText },
+            { id: 'insights', label: 'Narrative Intelligence', icon: Sparkles },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-foreground text-background shadow-xs'
+                    : 'text-foreground-soft hover:text-foreground hover:bg-foreground/[0.04]'
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-      {/* Content Workspace Grid */}
-      <ContentWorkspace
-        drafts={displayedDrafts}
-        selectedDraftId={selectedDraft?.id || null}
-        onSelectDraft={(draft) => {
-          setSelectedDraftId(draft.id);
-          setReviewModalDraft(draft);
-        }}
-      />
+        {selectedCampaignId && (
+          <button
+            onClick={() => setSelectedCampaignId(null)}
+            className="text-xs text-[var(--color-accent)] hover:underline flex items-center gap-1"
+          >
+            <span>Filtered by campaign · Clear</span>
+          </button>
+        )}
+      </div>
 
-      {/* Grid: Campaign Preview (Left 7 cols) & Insight + Visual (Right 5 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left: Campaign Blueprint Liquid-Glass Preview */}
-        <div className="lg:col-span-7 space-y-6">
+      {/* Tab 1: Campaigns & Preview */}
+      {activeTab === 'campaigns' && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-6"
+        >
+          {/* Campaigns List */}
+          <CampaignsList
+            campaigns={campaigns}
+            selectedCampaignId={selectedCampaignId}
+            onSelectCampaign={setSelectedCampaignId}
+          />
+
+          {/* Campaign Blueprint Preview */}
           <CampaignPreview
             campaign={currentSelectedCampaign}
-            onReviewCampaign={(camp) => {
+            onReviewCampaign={() => {
               if (displayedDrafts.length > 0) {
                 setReviewModalDraft(displayedDrafts[0]);
               }
             }}
           />
-        </div>
+        </motion.div>
+      )}
 
-        {/* Right: Marketing Insight & Hand-drawn Editorial Illustration */}
-        <div className="lg:col-span-5 space-y-6">
+      {/* Tab 2: Content Workspace */}
+      {activeTab === 'workspace' && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-6"
+        >
+          <ContentWorkspace
+            drafts={displayedDrafts}
+            selectedDraftId={selectedDraft?.id || null}
+            onSelectDraft={(draft) => {
+              setSelectedDraftId(draft.id);
+              setReviewModalDraft(draft);
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* Tab 3: Narrative Intelligence */}
+      {activeTab === 'insights' && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-6"
+        >
           <MarketingInsight />
 
-          {/* Editorial Illustration Card */}
-          <div className="rounded-2xl border border-border/70 bg-surface/35 p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 overflow-hidden">
+          <div className="rounded-2xl border border-border/70 bg-surface/35 p-6 flex flex-col sm:flex-row items-center gap-5 overflow-hidden">
             <div className="w-24 sm:w-28 shrink-0 flex items-center justify-center">
               <img
                 src="/illustrations/cta-figure.png"
-                alt="Editorial hand-drawn illustration of a founder moving forward with clear purpose and conviction"
-                className="w-full h-auto select-none opacity-90 transition-opacity hover:opacity-100"
+                alt="Founder moving forward with purpose"
+                className="w-full h-auto select-none opacity-90"
                 draggable={false}
               />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
-                <span className="text-[0.68rem] font-medium uppercase tracking-[0.16em] text-foreground-faint">
+                <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-foreground-faint">
                   Ideas → Content → Reach
                 </span>
               </div>
@@ -264,8 +317,8 @@ export default function MarketingView() {
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      )}
 
       {/* Create Campaign Modal */}
       <CreateCampaignModal

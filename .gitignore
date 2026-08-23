@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 .vite-source-tags.js
 .vercel
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+backend/data/*.json

@@ -1,5 +1,6 @@
 import React from 'react';
 import { PulseEvent } from './types';
+import { Activity } from 'lucide-react';
 
 interface OperatingPulseProps {
   events: PulseEvent[];
@@ -10,77 +11,74 @@ export default function OperatingPulse({
   events,
   onViewActivity,
 }: OperatingPulseProps) {
-  const getCategoryDot = (cat: PulseEvent['category']) => {
+  const getCategoryTheme = (cat: PulseEvent['category']) => {
     switch (cat) {
       case 'finance':
-        return 'var(--color-finance)';
+        return { dot: 'var(--color-finance)', tag: 'Finance' };
       case 'hiring':
-        return 'var(--color-hiring)';
+        return { dot: 'var(--color-hiring)', tag: 'Hiring' };
       case 'legal':
-        return 'var(--color-legal)';
+        return { dot: 'var(--color-legal)', tag: 'Legal' };
       case 'marketing':
-        return 'var(--color-accent)';
+        return { dot: 'var(--color-accent)', tag: 'Marketing' };
       default:
-        return 'var(--color-foreground)';
+        return { dot: 'var(--color-foreground)', tag: 'System' };
     }
   };
 
   return (
     <section aria-labelledby="operating-pulse-heading" className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2
-          id="operating-pulse-heading"
-          className="font-display text-lg sm:text-xl font-medium tracking-tight text-foreground"
-        >
-          Operating Pulse
-        </h2>
+      <div className="flex items-center justify-between border-b border-border/80 pb-3">
+        <div className="flex items-center gap-2">
+          <Activity className="h-4 w-4 text-foreground-soft" />
+          <h2
+            id="operating-pulse-heading"
+            className="font-display text-lg font-medium tracking-tight text-foreground"
+          >
+            Operating Pulse
+          </h2>
+        </div>
 
         {onViewActivity && (
           <button
             onClick={onViewActivity}
-            className="text-xs text-foreground-soft hover:text-foreground transition-colors"
+            className="text-xs text-foreground-soft hover:text-foreground transition-colors font-medium cursor-pointer"
           >
-            Full timeline
+            Full timeline →
           </button>
         )}
       </div>
 
-      {/* Timeline List */}
-      <div className="rounded-xl border border-border/70 bg-surface/40 p-4 sm:p-5">
-        <div className="relative space-y-4 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-border/60">
-          {events.map((event) => {
-            const dotColor = getCategoryDot(event.category);
-            return (
-              <div key={event.id} className="relative flex items-start gap-3.5 pl-0 group">
-                {/* Timeline dot */}
-                <span
-                  className="mt-1 h-3.5 w-3.5 shrink-0 rounded-full border-2 border-surface bg-surface flex items-center justify-center relative z-10"
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: dotColor }}
-                  />
-                </span>
+      {/* Open Timeline Feed (Zero Card Box Enclosure) */}
+      <div className="divide-y divide-border/60">
+        {events.map((event) => {
+          const theme = getCategoryTheme(event.category);
+          return (
+            <div key={event.id} className="py-3.5 first:pt-0 last:pb-0 flex items-start gap-3">
+              {/* Category Dot */}
+              <span
+                className="mt-1.5 h-2 w-2 rounded-full shrink-0"
+                style={{ backgroundColor: theme.dot }}
+              />
 
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline justify-between gap-1">
-                    <span className="text-xs font-medium text-foreground group-hover:text-foreground">
-                      {event.title}
-                    </span>
-                    <span className="text-[0.68rem] text-foreground-faint font-mono">
-                      {event.timestamp}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-[0.78rem] text-foreground-soft leading-snug">
-                    {event.description}
-                  </p>
+              {/* Event Details */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-foreground truncate">
+                    {event.title}
+                  </span>
+                  <span className="text-[0.68rem] text-foreground-faint font-mono shrink-0">
+                    {event.timestamp}
+                  </span>
                 </div>
+                <p className="mt-0.5 text-xs text-foreground-soft leading-normal">
+                  {event.description}
+                </p>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

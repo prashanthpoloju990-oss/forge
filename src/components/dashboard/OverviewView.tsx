@@ -152,6 +152,8 @@ const initialPulseEvents: PulseEvent[] = [
 
 import { useForge } from '../../context/ForgeContext';
 
+import InvestorMemoModal from './InvestorMemoModal';
+
 export default function OverviewView({
   onNavigateToApprovals,
   onNavigateToActivity,
@@ -165,6 +167,7 @@ export default function OverviewView({
   const [reviewingItem, setReviewingItem] = useState<AttentionItem | null>(null);
   const [commandModalOpen, setCommandModalOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
+  const [investorModalOpen, setInvestorModalOpen] = useState(false);
 
   // Live mapped attention items from central approvals
   const attentionItems: AttentionItem[] = approvals.map((app) => ({
@@ -211,7 +214,7 @@ export default function OverviewView({
       {/* 2. Hero Greeting Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-foreground-faint">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground-faint">
             <span>Friday, October 24</span>
             <span>·</span>
             <span>Seed Stage</span>
@@ -224,11 +227,19 @@ export default function OverviewView({
           </p>
         </div>
 
-        {/* Sync Status Badge */}
-        <div className="flex items-center gap-2">
-          <span className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs text-foreground-soft font-medium shadow-2xs">
+        {/* Sync Status & Investor Memo Action */}
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setInvestorModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl bg-surface border border-border px-3.5 py-2 text-xs font-semibold text-foreground hover:bg-foreground hover:text-background transition-all shadow-xs cursor-pointer"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+            <span>Generate Investor Memo</span>
+          </button>
+
+          <span className="glass inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs text-foreground-soft font-medium shadow-2xs">
             <span className="h-2 w-2 rounded-full bg-[var(--color-finance)] animate-pulse" />
-            <span>3 systems synchronized</span>
+            <span>3 systems synced</span>
           </span>
         </div>
       </div>
@@ -256,32 +267,33 @@ export default function OverviewView({
         {/* Right Column: 7. Visual Element + 6. Operating Pulse (5 cols on lg) */}
         <div className="lg:col-span-5 space-y-6">
           {/* 7. Restrained Editorial Hand-Drawn Visual Element */}
-          <div className="relative rounded-2xl border border-border/70 bg-surface/30 p-5 sm:p-6 overflow-hidden">
-            {/* Subtle background grain & linework */}
-            <div className="flex items-center justify-between border-b border-border/50 pb-3 mb-4">
-              <span className="text-[0.68rem] font-medium uppercase tracking-[0.18em] text-foreground-faint">
+          {/* 5. Editorial Founder System Overview (Open Fluid Style) */}
+          <div className="border-b border-border/80 pb-6">
+            <div className="flex items-center justify-between pb-3 mb-3">
+              <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-foreground-faint">
                 Founders Operating System
               </span>
-              <span className="text-[0.68rem] text-foreground-faint font-mono">
-                FORGE Engine
-              </span>
+              <div className="flex items-center gap-1.5 font-mono text-[0.68rem] text-emerald-700">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Engine Active</span>
+              </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-28 sm:w-32 shrink-0">
+            <div className="flex flex-col sm:flex-row items-center gap-5">
+              <div className="w-24 sm:w-28 shrink-0">
                 <img
                   src="/illustrations/dashboard-founder.png"
-                  alt="Editorial hand-drawn linework illustration of a founder orchestrating company systems"
-                  className="w-full h-auto select-none opacity-90 transition-opacity hover:opacity-100"
+                  alt="Founder orchestrating company systems"
+                  className="w-full h-auto select-none opacity-90 drop-shadow-2xs"
                   draggable={false}
                 />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 space-y-1">
                 <div className="font-display text-base font-medium text-foreground leading-snug">
-                  Finance, Talent & Legal
+                  Finance, Talent & Delaware Legal
                 </div>
-                <p className="mt-1 text-xs text-foreground-soft leading-relaxed">
-                  Every decision, approval, and document flows directly into your unified company graph.
+                <p className="text-xs text-foreground-soft leading-relaxed">
+                  Every decision, approval, and document flows directly into your unified company graph without spreadsheet context loss.
                 </p>
               </div>
             </div>
@@ -309,6 +321,12 @@ export default function OverviewView({
         initialQuery={commandQuery}
         onNavigate={onNavigate}
         onActionComplete={showToast}
+      />
+
+      {/* Investor Memo Generator Modal */}
+      <InvestorMemoModal
+        isOpen={investorModalOpen}
+        onClose={() => setInvestorModalOpen(false)}
       />
     </div>
   );

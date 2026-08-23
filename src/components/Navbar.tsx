@@ -39,12 +39,7 @@ export default function Navbar({ onEnterForge }: NavbarProps = {}) {
         className="fixed top-4 left-1/2 z-50 w-[calc(100%-1.25rem)] max-w-3xl -translate-x-1/2 sm:top-6"
       >
         <div
-          className={`glass flex items-center justify-between gap-4 rounded-full px-4 py-2.5 transition-shadow duration-500 sm:px-6 sm:py-3 ${
-            scrolled ? 'shadow-[0_10px_34px_rgba(22,19,15,0.10)]' : 'shadow-none'
-          }`}
-          style={{
-            background: scrolled ? 'rgba(252, 250, 244, 0.82)' : 'rgba(252, 250, 244, 0.42)',
-          }}
+          className={`glass-liquid flex items-center justify-between gap-4 rounded-full px-4 py-2.5 transition-all duration-300 sm:px-6 sm:py-3`}
         >
           <a
             href="#top"

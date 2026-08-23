@@ -1,5 +1,6 @@
 import { CommandProcessingStep, CommandResult } from './types';
 import { ForgeState } from '../types/forge';
+import { forgeApi } from '../api/forgeApi';
 
 export const COMMAND_STEPS: CommandProcessingStep[] = [
   {
@@ -28,15 +29,48 @@ export async function executeCommand(
 
   // 1. Step: Understanding
   if (onStepChange) onStepChange(COMMAND_STEPS[0]);
-  await new Promise((r) => setTimeout(r, 260));
+  await new Promise((r) => setTimeout(r, 200));
+
+  // Try FastAPI backend first
+  try {
+    const apiRes = await forgeApi.sendCommand(query, state?.startup?.name);
+    if (apiRes && apiRes.status === 'ready') {
+      if (onStepChange) onStepChange(COMMAND_STEPS[1]);
+      await new Promise((r) => setTimeout(r, 200));
+      if (onStepChange) onStepChange(COMMAND_STEPS[2]);
+
+      const dept = apiRes.intent.includes('LEGAL')
+        ? 'legal'
+        : apiRes.intent.includes('TREASURY') || apiRes.intent.includes('FINANCE')
+        ? 'finance'
+        : apiRes.intent.includes('OFFER') || apiRes.intent.includes('HIRING')
+        ? 'hiring'
+        : 'command';
+
+      return {
+        id: `cmd-${Date.now()}`,
+        query,
+        department: dept as any,
+        departmentLabel: apiRes.agent_matched,
+        title: apiRes.title,
+        summary: apiRes.summary,
+        actionLabel: apiRes.action_prepared?.primary_button || 'Review action →',
+        targetNav: dept === 'legal' ? 'approvals' : (dept as any),
+        metadata: apiRes.metadata,
+        tags: ['FastAPI Engine', 'Live AI Graph', 'Delaware Verified'],
+      };
+    }
+  } catch (err) {
+    console.warn('Fallback to local command evaluator', err);
+  }
 
   // 2. Step: Preparing
   if (onStepChange) onStepChange(COMMAND_STEPS[1]);
-  await new Promise((r) => setTimeout(r, 300));
+  await new Promise((r) => setTimeout(r, 250));
 
   // 3. Step: Ready
   if (onStepChange) onStepChange(COMMAND_STEPS[2]);
-  await new Promise((r) => setTimeout(r, 180));
+  await new Promise((r) => setTimeout(r, 150));
 
   // Match command patterns
   if (

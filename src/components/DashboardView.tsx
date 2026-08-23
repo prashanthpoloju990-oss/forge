@@ -54,26 +54,41 @@ function DashboardInner({ onLogout }: DashboardViewProps) {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col antialiased selection:bg-foreground selection:text-background">
-      {/* Global Toast Feedback */}
+      {/* High-Visibility Global Toast Notification */}
       <AnimatePresence>
         {toast && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 30, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="fixed top-16 right-4 sm:right-8 z-50 flex items-center gap-2.5 rounded-xl border border-border bg-surface px-4 py-2.5 shadow-xl text-xs font-medium text-foreground"
+            exit={{ opacity: 0, y: 20, scale: 0.92 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+            className="fixed bottom-6 right-4 sm:right-8 z-[9999] max-w-md w-[calc(100vw-2rem)] sm:w-auto flex items-start gap-3.5 rounded-2xl glass-liquid p-4 sm:p-4.5 shadow-[0_20px_50px_rgba(0,0,0,0.14)]"
           >
-            <CheckCircle2
-              className={`h-4 w-4 shrink-0 ${
+            {/* Status Icon Badge */}
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${
                 toast.type === 'error'
-                  ? 'text-rose-800'
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
                   : toast.type === 'info'
-                  ? 'text-[var(--color-hiring)]'
-                  : 'text-emerald-800'
+                  ? 'bg-[var(--color-hiring)]/10 border-[var(--color-hiring)]/30 text-[var(--color-hiring)]'
+                  : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
               }`}
-            />
-            <span>{toast.message}</span>
+            >
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+
+            {/* Content Text */}
+            <div className="min-w-0 flex-1 pt-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-foreground-faint">
+                  System Notification
+                </span>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <p className="mt-0.5 text-xs sm:text-[0.84rem] font-medium text-foreground leading-snug">
+                {toast.message}
+              </p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

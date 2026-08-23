@@ -61,7 +61,7 @@ export default function TopBar({
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-border/70 bg-surface/80 px-4 sm:px-6 lg:px-8 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-border/70 glass-liquid px-4 sm:px-6 lg:px-8">
       {/* Left: Mobile trigger & Breadcrumb */}
       <div className="flex items-center gap-3">
         <button
@@ -76,7 +76,7 @@ export default function TopBar({
         <div className="flex items-center gap-2 text-xs sm:text-[0.82rem]">
           <span className="text-foreground-faint font-medium">{startup.name}</span>
           <span className="text-foreground-faint/60">/</span>
-          <span className="font-medium text-foreground">{current.title}</span>
+          <span className="font-semibold text-foreground">{current.title}</span>
         </div>
       </div>
 
@@ -85,12 +85,12 @@ export default function TopBar({
         {/* Global Search / Command trigger */}
         <button
           onClick={onOpenCommand}
-          className="group flex items-center gap-2 sm:gap-3 rounded-full border border-border/80 bg-surface/60 px-3 py-1.5 text-xs text-foreground-soft hover:border-foreground/25 hover:bg-surface transition-all duration-150 shadow-xs"
+          className="group flex items-center gap-2 sm:gap-3 rounded-full glass-pill px-3.5 py-1.5 text-xs text-foreground-soft hover:text-foreground transition-all duration-150 shadow-xs cursor-pointer"
         >
           <Search className="h-3.5 w-3.5 text-foreground-faint group-hover:text-foreground transition-colors" strokeWidth={1.75} />
-          <span className="hidden sm:inline text-foreground-soft">Command or search...</span>
+          <span className="hidden sm:inline text-foreground-soft font-medium">Command or search...</span>
           <span className="inline sm:hidden text-foreground-soft">Command</span>
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border/80 bg-foreground/[0.03] px-1.5 py-0.5 font-mono text-[0.62rem] text-foreground-faint">
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border/80 bg-foreground/[0.04] px-1.5 py-0.5 font-mono text-[0.62rem] text-foreground-faint">
             ⌘K
           </kbd>
         </button>

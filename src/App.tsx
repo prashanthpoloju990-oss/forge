@@ -3,9 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Problem from './components/Problem';
 import Introducing from './components/Introducing';
-import Finance from './components/Finance';
-import Hiring from './components/Hiring';
-import Legal from './components/Legal';
+import OperatingSuite from './components/OperatingSuite';
 import HowItWorks from './components/HowItWorks';
 import ProductPreview from './components/ProductPreview';
 import FinalCTA from './components/FinalCTA';
@@ -76,9 +74,7 @@ function App() {
         <Hero onEnterForge={openLogin} />
         <Problem />
         <Introducing />
-        <Finance />
-        <Hiring />
-        <Legal />
+        <OperatingSuite onEnterForge={openLogin} />
         <HowItWorks />
         <ProductPreview onEnterForge={openLogin} />
         <FinalCTA onEnterForge={openLogin} />
